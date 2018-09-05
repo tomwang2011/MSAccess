@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class MSAccessConnect {
-	public void connectDB(String pathToDB, String dbName, String table, String categoryCode, String sumCategory) throws IOException {
+	public void connectDBAll(String pathToDB, String dbName, String table, String categoryCode, String sumCategory, int count) throws IOException {
 
 		if (dbName == null || table == null || categoryCode == null || sumCategory == null) {
 			throw new IOException("One of the properties required is not set");
@@ -53,48 +53,21 @@ public class MSAccessConnect {
 //			resultSet = statement.executeQuery(
 //				"SELECT CustCode, productCode, " + sumCategory +" FROM " + table + " WHERE CategoryCode = '" + categoryCode + "' AND " + sumCategory + " != 0 ORDER BY " + sumCategory + " DESC");
 
-			resultSet = statement.executeQuery(
-				"SELECT CustCode, productCode,CategoryCode, " + sumCategory +" FROM " + table + " WHERE " + sumCategory + " != 0 ORDER BY " + sumCategory + " DESC");
 
 //			resultSet = statement.executeQuery(
 //				"SELECT TOP 10 productCode, SumOfYear1_OrderAmt FROM " + table + " WHERE CategoryCode = '" + categoryCode + "' AND CustCode = '" + custCode + "' ORDER BY SumOfYear1_OrderAmt DESC");
 				// processing returned data and printing into console
 
-			Map<String, Map<Double, String>> map = new TreeMap<>();
-
-			while(resultSet.next()) {
-				String key = resultSet.getString(1);
-				Map<Double, String> list = map.getOrDefault(key, new TreeMap<>(Collections.reverseOrder()));
-
-				if (list.containsKey(resultSet.getDouble(4))) {
-					list.put(resultSet.getDouble(4)+0.0001, resultSet.getString(2) + "," + resultSet.getString(3));
-				}
-				else {
-					list.put(resultSet.getDouble(4), resultSet.getString(2) + "," + resultSet.getString(3));
-				}
-
-				map.put(key, list);
+			if (categoryCode.equals("all")) {
+				resultSet = getAllCategoryResultSet(statement, sumCategory, table);
+			}
+			else {
+				resultSet = getIndividualCategoryResultSet(statement, sumCategory, categoryCode, table);
 			}
 
-			BufferedWriter writer = new BufferedWriter(new FileWriter(table + "-" + categoryCode +".csv"));
+			writeToFile(resultSet, categoryCode, count, sumCategory, table);
 
-			writer.write("CustCode,productCode,CategoryCode," + sumCategory + "\n");
 
-			for (Map.Entry<String, Map<Double, String>> entry : map.entrySet()) {
-				Map<Double, String> keymap = entry.getValue();
-
-				int count = 0;
-				for (Map.Entry<Double, String> entry2 : keymap.entrySet()) {
-					if (count == 10) {
-						break;
-					}
-
-					writer.write(entry.getKey() + "," + entry2.getValue() + "," + entry2.getKey());
-					writer.write("\n");
-
-					count++;
-				}
-			}
 		}
 		catch(SQLException sqlex){
 			sqlex.printStackTrace();
@@ -114,6 +87,55 @@ public class MSAccessConnect {
 			}
 			catch (SQLException sqlex) {
 				sqlex.printStackTrace();
+			}
+		}
+	}
+
+	private ResultSet getAllCategoryResultSet(Statement statement, String sumCategory, String table) throws SQLException {
+		return statement.executeQuery(
+			"SELECT CustCode, productCode, CategoryCode, " + sumCategory +" FROM " + table + " WHERE " + sumCategory + " != 0 ORDER BY " + sumCategory + " DESC");
+	}
+
+	private ResultSet getIndividualCategoryResultSet(Statement statement, String sumCategory, String categoryCode, String table) throws SQLException {
+		return statement.executeQuery(
+			"SELECT CustCode, productCode, CategoryCode, " + sumCategory +" FROM " + table + " WHERE CategoryCode = '" + categoryCode + "' AND " + sumCategory + " != 0 ORDER BY " + sumCategory + " DESC");
+
+	}
+
+	private void writeToFile(ResultSet resultSet, String categoryCode, int count, String sumCategory, String table) throws SQLException, IOException {
+		Map<String, Map<Double, String>> map = new TreeMap<>();
+
+		while(resultSet.next()) {
+			String key = resultSet.getString(1);
+			Map<Double, String> list = map.getOrDefault(key, new TreeMap<>(Collections.reverseOrder()));
+
+			if (list.containsKey(resultSet.getDouble(4))) {
+				list.put(resultSet.getDouble(4)+0.0001, resultSet.getString(2) + "," + resultSet.getString(3));
+			}
+			else {
+				list.put(resultSet.getDouble(4), resultSet.getString(2) + "," + resultSet.getString(3));
+			}
+
+			map.put(key, list);
+		}
+
+		BufferedWriter writer = new BufferedWriter(new FileWriter(table + "-" + categoryCode +"-" + count +".csv"));
+
+		writer.write("CustCode,productCode,CategoryCode," + sumCategory + "\n");
+
+		for (Map.Entry<String, Map<Double, String>> entry : map.entrySet()) {
+			Map<Double, String> keymap = entry.getValue();
+
+			int counter = 0;
+			for (Map.Entry<Double, String> entry2 : keymap.entrySet()) {
+				if (counter == count) {
+					break;
+				}
+
+				writer.write(entry.getKey() + "," + entry2.getValue() + "," + entry2.getKey());
+				writer.write("\n");
+
+				counter++;
 			}
 		}
 	}

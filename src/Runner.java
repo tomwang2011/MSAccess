@@ -10,9 +10,49 @@ public class Runner {
 
 		properties.load(new FileInputStream("Query.properties"));
 
-		msAccessConnect.connectDB(
-			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), properties.getProperty("categoryCode"),
-			properties.getProperty("sumCategory"));
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "all",
+			properties.getProperty("sumCategory"), 50);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "A",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "B",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "G",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "H",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "K",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "L",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "O",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "S",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "W",
+			properties.getProperty("sumCategory"), 25);
+
+		msAccessConnect.connectDBAll(
+			properties.getProperty("pathToDB"), properties.getProperty("databaseName"), properties.getProperty("table"), "X",
+			properties.getProperty("sumCategory"), 25);
 	}
 
 	private static void readCSV() {
